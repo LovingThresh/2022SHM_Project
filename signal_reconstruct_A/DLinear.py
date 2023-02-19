@@ -63,7 +63,6 @@ class DLinear(nn.Module):
         self.decomposition = series_decomp(kernel_size)
         self.individual = configs.individual
         self.channels = configs.enc_in
-
         if self.individual:
             self.Linear_Seasonal = nn.ModuleList()
             self.Linear_Trend = nn.ModuleList()
@@ -101,6 +100,7 @@ class DLinear(nn.Module):
 
         x = seasonal_output + trend_output
         x = torch.sum(x, dim=1, keepdim=True)
+
         return x.permute(0, 2, 1)  # to [Batch, Output length, Channel]
 
 
@@ -122,11 +122,3 @@ class MM_DLinear(BaseModel):
             return x
         else:
             return None
-
-
-dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
-json_str = json.dumps(dic)
-model_cfg = json.loads(json_str, object_hook=lambda d: namedtuple("X", d.keys())(*d.values()))
-model_MM_DLinear = MM_DLinear(model_cfg)
-a = torch.rand(2, 256, 4)
-out = model_MM_DLinear(a)

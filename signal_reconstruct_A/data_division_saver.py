@@ -2,8 +2,10 @@
 # @Time    : 2023/2/4 9:44
 # @Author  : LiuYe
 # @Email   : csu1704liuye@163.com | sy2113205@buaa.edu.cn
-# @File    : data_division.py
+# @File    : data_division_saver.py
 # @Software: PyCharm
+import os
+import json
 import numpy as np
 import scipy.io as scio
 
@@ -60,3 +62,27 @@ def save_crop_data(data_list, prex='start_0_n_128'):
 # save_crop_data(X_2, prex='start_50_n_128')
 
 # position_encoding = []
+
+
+a = {
+    "metainfo": {"dataset_type": "test_dataset", "task_name": "test_task"},
+    "data_list": []}
+
+
+def get_info_meta(path, save_path):
+    dict_info_meta = {
+        "metainfo": {"dataset_type": "signal_reconstruct_dataset", "task_name": "A_task"},
+        "data_list": []
+    }
+
+    signal_file_list = os.listdir(path)
+    for i in signal_file_list:
+        i_dict = {'file_path': path + '/' + i}
+        dict_info_meta["data_list"].append(i_dict)
+
+    json_str = json.dumps(dict_info_meta)
+
+    with open(save_path, 'w') as f:
+        f.write(json_str)
+
+    return None
