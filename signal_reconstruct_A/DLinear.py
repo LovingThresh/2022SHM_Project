@@ -4,13 +4,9 @@
 # @Email   : csu1704liuye@163.com | sy2113205@buaa.edu.cn
 # @File    : DLinear.py
 # @Software: PyCharm
-import json
+
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from collections import namedtuple
-from mmengine.model import BaseModel
-from typing import Optional, Union, Dict
 
 
 class moving_avg(nn.Module):
@@ -102,23 +98,3 @@ class DLinear(nn.Module):
         x = torch.sum(x, dim=1, keepdim=True)
 
         return x.permute(0, 2, 1)  # to [Batch, Output length, Channel]
-
-
-class MM_DLinear(BaseModel):
-    def __init__(self, configs):
-        super().__init__()
-        self.net = DLinear(configs=configs)
-
-    def forward(self,
-                inputs: torch.Tensor,
-                data_samples: Union[Optional[list], torch.Tensor] = None,
-                mode: str = 'tensor') -> Union[Dict[str, torch.Tensor], list, tuple, None]:
-        x = self.net(inputs)
-        if mode == 'loss':
-            return {'loss': F.mse_loss(x, data_samples)}
-        elif mode == 'predict':
-            return x, data_samples
-        elif mode == 'tensor':
-            return x
-        else:
-            return None

@@ -1,55 +1,97 @@
-import json
+import torch
+import torch.nn.functional as F
 
 from torch.optim import AdamW
-from collections import namedtuple
 
+from mmengine import MODELS, METRICS
 from mmengine.runner import Runner
+from mmengine.model import BaseModel
+from mmengine.evaluator import BaseMetric
 from mmengine.dataset import BaseDataset
 
-from DLinear import MM_DLinear
-from data_loader import load_signal
+from config import *
+from DLinear import DLinear
+from typing import Optional, Union, Dict
 
-A_data_root = 'V:/2022SHM-dataset/'
-A_path = ''
-save_A_path = "signal_reconstruct_dataset_A.json"
 
-dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
-json_str = json.dumps(dic)
-model_cfg = json.loads(json_str, object_hook=lambda d: namedtuple("X", d.keys())(*d.values()))
+# ------------------------------------------------------------- #
+#                        register_module                        #
+# ------------------------------------------------------------- #
 
-param_scheduler = [
-    dict(type='LinearLR',
-         start_factor=0.001,
-         by_epoch=True,
-         begin=0,
-         end=5),
-    dict(type='CosineAnnealingLR',
-         T_max=100,
-         by_epoch=False,
-         begin=5,
-         end=100)
-]
 
-# the build function of runner class
+@MODELS.register_module()
+class MM_DLinear(BaseModel):
+    def __init__(self, configs):
+        super().__init__()
+        self.net = DLinear(configs=configs)
+
+    def forward(self,
+                inputs: torch.Tensor,
+                data_samples: Union[Optional[list], torch.Tensor] = None,
+                mode: str = 'tensor') -> Union[Dict[str, torch.Tensor], list, tuple, None]:
+        x = self.net(inputs)
+        if mode == 'loss':
+            return {'loss': F.mse_loss(x, data_samples)}
+        elif mode == 'predict':
+            return x, data_samples
+        elif mode == 'tensor':
+            return x
+        else:
+            return None
+
+
+@METRICS.register_module()
+class MM_MSELoss(BaseMetric):
+
+    def process(self, data_batch, data_samples):
+        score, gt = data_samples
+        self.results.append({
+            'batch_size': len(gt),
+            'mse_loss': F.mse_loss(score, gt),
+        })
+
+    def compute_metrics(self, results):
+
+        total_loss = sum(item['mse_loss'] for item in results) / len(results)
+
+        return dict(loss=total_loss)
+
+
+# -------------------------------------------------------- #
+#                          Runner                          #
+# -------------------------------------------------------- #
+
 runner = Runner(
-    model=MM_DLinear(configs=model_cfg),
+    model=dict(type='MM_DLinear', configs=model_cfg),
     work_dir='./work_dir',
     train_dataloader=dict(
-        batch_size=256,
+        batch_size=batch_size,
         sampler=dict(type='DefaultSampler', shuffle=True),
-        dataset=BaseDataset(ann_file=save_A_path, data_root=A_data_root,
-                            pipeline=[load_signal], data_prefix=dict(file_path=A_path), serialize_data=True),
-        collate_fn=dict(type='default_collate')
-    ),
-    optim_wrapper=dict(type='AmpOptimWrapper', optimizer=dict(type=AdamW, lr=0.001)),
+        dataset=BaseDataset(ann_file=train_ann_file, data_root=data_root, data_prefix={'file_path': train_path},
+                            pipeline=train_transform),
+        collate_fn=dict(type='default_collate')),
+    val_dataloader=dict(
+        batch_size=batch_size,
+        sampler=dict(type='DefaultSampler', shuffle=False),
+        dataset=BaseDataset(ann_file=val_ann_file, data_root=data_root, data_prefix={'file_path': val_path},
+                            pipeline=val_transform),
+        collate_fn=dict(type='default_collate')),
+    test_dataloader=dict(
+        batch_size=batch_size,
+        sampler=dict(type='DefaultSampler', shuffle=False),
+        dataset=BaseDataset(ann_file=test_ann_file, data_root=data_root, data_prefix={'file_path': test_path},
+                            pipeline=test_transform),
+        collate_fn=dict(type='default_collate')),
+    optim_wrapper=dict(type='AmpOptimWrapper', optimizer=dict(type=AdamW, lr=init_lr)),
     param_scheduler=param_scheduler,
-    train_cfg=dict(by_epoch=True, max_epochs=100, val_interval=1),
-    val_dataloader=None,
-    val_cfg=None,
-    val_evaluator=None,
+    train_cfg=dict(by_epoch=True, max_epochs=max_epoch, val_interval=1),
+    val_cfg=dict(),
+    val_evaluator=dict(type='MM_MSELoss', prefix='val'),
+    test_cfg=dict(),
+    test_evaluator=dict(type='MM_MSELoss', prefix='test'),
     default_hooks=dict(
         timer=dict(type='IterTimerHook'),
-        checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10),
+        checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
         logger=dict(type='LoggerHook')),
 )
 runner.train()

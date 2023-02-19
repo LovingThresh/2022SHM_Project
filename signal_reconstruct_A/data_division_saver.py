@@ -6,6 +6,8 @@
 # @Software: PyCharm
 import os
 import json
+import random
+import shutil
 import numpy as np
 import scipy.io as scio
 
@@ -64,9 +66,17 @@ def save_crop_data(data_list, prex='start_0_n_128'):
 # position_encoding = []
 
 
-a = {
-    "metainfo": {"dataset_type": "test_dataset", "task_name": "test_task"},
-    "data_list": []}
+def data_division(path, train_path, val_path, test_path):
+
+    signal_file_list = os.listdir(path)
+    random.shuffle(signal_file_list)
+    train_file_list =  signal_file_list[:int(len(signal_file_list) * 0.9)]
+    val_file_list = signal_file_list[int(len(signal_file_list) * 0.9) : int(len(signal_file_list) * 0.95)]
+    test_file_list = signal_file_list[int(len(signal_file_list) * 0.95):]
+
+    for file_list, dst_path in zip([train_file_list, val_file_list, test_file_list], [train_path, val_path, test_path]):
+        for file in file_list:
+            shutil.copyfile(os.path.join(path, file), os.path.join(dst_path, file))
 
 
 def get_info_meta(path, save_path):
@@ -77,7 +87,7 @@ def get_info_meta(path, save_path):
 
     signal_file_list = os.listdir(path)
     for i in signal_file_list:
-        i_dict = {'file_path': path + '/' + i}
+        i_dict = {'file_path': i}
         dict_info_meta["data_list"].append(i_dict)
 
     json_str = json.dumps(dict_info_meta)
