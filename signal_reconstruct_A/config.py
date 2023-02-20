@@ -24,11 +24,12 @@ dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
 model_cfg = dict2cls(dic)
 
 max_epoch = 100
-init_lr = 0.001
+# init_lr = 0.001
+init_lr = 0.00005
 
 param_scheduler = [
     dict(type='LinearLR',
-         start_factor=0.001,
+         start_factor=init_lr,
          by_epoch=True,
          begin=0,
          end=5),
