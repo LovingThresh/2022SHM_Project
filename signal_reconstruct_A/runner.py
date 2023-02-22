@@ -11,6 +11,7 @@ from mmengine.dataset import BaseDataset
 
 from config import *
 from DLinear import DLinear
+from TimesNet import TimesNet
 from typing import Optional, Union, Dict
 
 
@@ -40,6 +41,27 @@ class MM_DLinear(BaseModel):
             return None
 
 
+@MODELS.register_module()
+class MM_TimesNet(BaseModel):
+    def __init__(self, configs):
+        super().__init__()
+        self.net = TimesNet(configs=configs)
+
+    def forward(self,
+                inputs: torch.Tensor,
+                data_samples: Union[Optional[list], torch.Tensor] = None,
+                mode: str = 'tensor') -> Union[Dict[str, torch.Tensor], list, tuple, None]:
+        x = self.net(inputs)
+        if mode == 'loss':
+            return {'loss': F.mse_loss(x, data_samples)}
+        elif mode == 'predict':
+            return x, data_samples
+        elif mode == 'tensor':
+            return x
+        else:
+            return None
+
+
 @METRICS.register_module()
 class MM_MSELoss(BaseMetric):
 
@@ -51,19 +73,33 @@ class MM_MSELoss(BaseMetric):
         })
 
     def compute_metrics(self, results):
-
         total_loss = sum(item['mse_loss'] for item in results) / len(results)
 
-        return dict(loss=total_loss)
+        return dict(mse_loss=total_loss)
+
+
+@METRICS.register_module()
+class MM_MAELoss(BaseMetric):
+
+    def process(self, data_batch, data_samples):
+        score, gt = data_samples
+        self.results.append({
+            'batch_size': len(gt),
+            'mae_loss': F.l1_loss(score, gt),
+        })
+
+    def compute_metrics(self, results):
+        total_loss = sum(item['mae_loss'] for item in results) / len(results)
+
+        return dict(mae_loss=total_loss)
 
 
 # -------------------------------------------------------- #
 #                          Runner                          #
 # -------------------------------------------------------- #
-
 runner = Runner(
-    model=dict(type='MM_DLinear', configs=model_cfg),
-    work_dir='./work_dir',
+    model=dict(type='MM_TimesNet', configs=TimesNet_model_cfg),
+    work_dir='./work_dir/TimesNet',
     train_dataloader=dict(
         batch_size=batch_size,
         sampler=dict(type='DefaultSampler', shuffle=True),
@@ -86,13 +122,13 @@ runner = Runner(
     param_scheduler=param_scheduler,
     train_cfg=dict(by_epoch=True, max_epochs=max_epoch, val_interval=1),
     val_cfg=dict(),
-    val_evaluator=dict(type='MM_MSELoss', prefix='val'),
+    val_evaluator=[dict(type='MM_MSELoss', prefix='val'), dict(type='MM_MAELoss', prefix='val')],
     test_cfg=dict(),
-    test_evaluator=dict(type='MM_MSELoss', prefix='test'),
+    test_evaluator=[dict(type='MM_MSELoss', prefix='test'), dict(type='MM_MAELoss', prefix='val')],
     default_hooks=dict(
         timer=dict(type='IterTimerHook'),
         checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
         logger=dict(type='LoggerHook')),
-    load_from='./work_dir/20230219_171830/epoch_100.pth',
+    # load_from='./work_dir/20230219_171830/epoch_100.pth',
 )
 runner.train()
