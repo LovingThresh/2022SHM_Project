@@ -17,7 +17,7 @@ val_transform = [Signal_transform(mode='val')]
 test_transform = [Signal_transform(mode='test')]
 
 # batch_size setting
-batch_size = 64
+batch_size = 32
 
 # model_cfg setting
 dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}

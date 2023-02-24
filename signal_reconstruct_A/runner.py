@@ -99,7 +99,7 @@ class MM_MAELoss(BaseMetric):
 # -------------------------------------------------------- #
 runner = Runner(
     model=dict(type='MM_TimesNet', configs=TimesNet_model_cfg),
-    work_dir='./work_dir/TimesNet',
+    work_dir='S:/work_dir/TimesNet',
     train_dataloader=dict(
         batch_size=batch_size,
         sampler=dict(type='DefaultSampler', shuffle=True),
@@ -118,7 +118,7 @@ runner = Runner(
         dataset=BaseDataset(ann_file=test_ann_file, data_root=data_root, data_prefix={'file_path': test_path},
                             pipeline=test_transform),
         collate_fn=dict(type='default_collate')),
-    optim_wrapper=dict(type='AmpOptimWrapper', optimizer=dict(type=AdamW, lr=init_lr)),
+    optim_wrapper=dict(type='OptimWrapper', optimizer=dict(type=AdamW, lr=init_lr)),
     param_scheduler=param_scheduler,
     train_cfg=dict(by_epoch=True, max_epochs=max_epoch, val_interval=1),
     val_cfg=dict(),
