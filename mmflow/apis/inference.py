@@ -53,8 +53,8 @@ def init_model(config: Union[str, Config],
     return model
 
 
-def inference_model(model: torch.nn.Module, img1s: Union[str, np.ndarray],
-                    img2s: Union[str, np.ndarray]) -> List[FlowDataSample]:
+def inference_model(model: torch.nn.Module, img1s: Union[List, str, np.ndarray],
+                    img2s: Union[List, str, np.ndarray]) -> List[FlowDataSample]:
     """Inference images pairs with the flow estimator.
 
     Args:
@@ -88,7 +88,7 @@ def inference_model(model: torch.nn.Module, img1s: Union[str, np.ndarray],
     # there is no need to load annotation.
     for t in cfg.pipeline:
         if t.get('type') == 'LoadAnnotations':
-            cfg.test_pipeline.remove(t)
+            cfg.pipeline.remove(t)
 
     test_pipeline = Compose(cfg.pipeline)
     datas = defaultdict(list)

@@ -1,8 +1,9 @@
 _base_ = [
-    '../_base_/models/gma/gma_plus-p.py',
-    '../_base_/datasets/flyingthings3d_raft_400x720.py',
-    '../_base_/schedules/gma_120k.py', '../_base_/default_runtime.py'
+    'V:/2022SHM_Project/displacement_measurement/configs/_base_/models/gma/gma_plus-p.py',
+    'V:/2022SHM_Project/displacement_measurement/configs/_base_/datasets/flyingthings3d_raft_400x720.py',
+    'V:/2022SHM_Project/displacement_measurement/configs/_base_/schedules/gma_120k.py', 'V:/2022SHM_Project/displacement_measurement/configs/_base_/default_runtime.py'
 ]
+
 
 model = dict(freeze_bn=False, test_cfg=dict(iters=32))
 
