@@ -98,8 +98,8 @@ class MM_MAELoss(BaseMetric):
 #                          Runner                          #
 # -------------------------------------------------------- #
 runner = Runner(
-    model=dict(type='MM_TimesNet', configs=TimesNet_model_cfg),
-    work_dir='S:/work_dir/TimesNet',
+    model=dict(type='MM_DLinear', configs=DLiner_model_cfg),
+    work_dir='S:/work_dir/DLinerNet',
     train_dataloader=dict(
         batch_size=batch_size,
         sampler=dict(type='DefaultSampler', shuffle=True),

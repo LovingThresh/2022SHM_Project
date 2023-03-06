@@ -12,8 +12,8 @@ import numpy as np
 import scipy.io as scio
 
 
-clean_data_path = './a/data_clean.mat'
-noise_data_path = './a/data_noised.mat'
+clean_data_path = 'V:/2022SHM_Project/a/data_clean.mat'
+noise_data_path = 'V:/2022SHM_Project/a/data_noised.mat'
 
 mean = 3.0235e-07
 std = 0.0144
@@ -23,11 +23,15 @@ def load_mat_data(data_path):
 
     data_dict = scio.loadmat(data_path)
 
-    return data_dict['data_noised']  # return (5, 1000001) for task A 100 Hz
+    return data_dict['data']  # return (5, 1000001) for task A 100 Hz
 
 
 loading_data = load_mat_data(data_path=clean_data_path)
 # loading_data = load_mat_data(data_path=noise_data_path)
+
+train_loading_data = loading_data[:, :int(0.95 * 1000001)]
+val_loading_data = loading_data[:, int(0.95 * 1000001) : int(0.975 * 1000001)]
+test_loading_data = loading_data[:, int(0.975 * 1000001):]
 
 
 def sliding_window(data, sw_width=256, n_out=128, in_start=0):
@@ -45,21 +49,24 @@ def sliding_window(data, sw_width=256, n_out=128, in_start=0):
     return data_list
 
 
+loading_data = test_loading_data
 X = sliding_window(loading_data, sw_width=256, n_out=128, in_start=0)
-X_1 = sliding_window(loading_data, sw_width=256, n_out=64, in_start=50)
-X_2 = sliding_window(loading_data, sw_width=256, n_out=128, in_start=50)
+X_1 = sliding_window(loading_data, sw_width=256, n_out=256, in_start=100)
 
 
-# prex='start_0_n_128' ; 'start_50_n_64' ; 'start_50_n_128'
+# prex='start_0_n_128' ; 'start_100_n_256'
 #
 
-def save_crop_data(data_list, prex='start_0_n_128'):
+def save_crop_data(data_list, mode='train', prex='start_0_n_128'):
 
     for num, i in enumerate(data_list):
 
-        np.savetxt('./crop_dataset_Task_2_A/noise_{}_{}.csv'.format(prex, num), i)
+        np.savetxt('V:/2022SHM-dataset/crop_data_project_2_A_dataset/{}/{}_{}.csv'.format(mode, prex, num), i)
 
-# save_crop_data(X)
+
+save_crop_data(X, mode='test')
+save_crop_data(X_1, mode='test', prex='start_100_n_256')
+
 # save_crop_data(X_2, prex='start_50_n_64')
 # save_crop_data(X_2, prex='start_50_n_128')
 
@@ -96,3 +103,7 @@ def get_info_meta(path, save_path):
         f.write(json_str)
 
     return None
+
+
+get_info_meta('V:/2022SHM-dataset/crop_data_project_2_A_dataset/val',
+              'V:/2022SHM-dataset/crop_data_project_2_A_dataset/val.json')

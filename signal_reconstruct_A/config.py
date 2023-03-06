@@ -3,7 +3,7 @@ from data_loader import Signal_transform
 
 
 # dataset setting
-data_root = 'V:/2022SHM-dataset/crop_dataset_Task_2_A_dataset'
+data_root = 'V:/2022SHM-dataset/crop_data_project_2_A_dataset'
 train_path = 'train'
 train_ann_file = "train.json"
 val_path = 'val'
@@ -17,7 +17,7 @@ val_transform = [Signal_transform(mode='val')]
 test_transform = [Signal_transform(mode='test')]
 
 # batch_size setting
-batch_size = 32
+batch_size = 64
 
 # model_cfg setting
 dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
