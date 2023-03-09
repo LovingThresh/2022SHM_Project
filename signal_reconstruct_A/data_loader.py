@@ -52,3 +52,40 @@ class Signal_transform:
 
         return top_four_signal.permute(1, 0), fifth_signal.permute(1, 0)
 
+
+class Signal_transform_B:
+
+    def __init__(self, mode='train'):
+
+        self.mode = mode
+
+    def __call__(self, data_info):
+        signal = np.loadtxt(data_info['file_path'])
+        signal = TSTensor(signal)
+
+        # TSStandardize
+
+        signal = TSStandardize(mean=3.0235e-07, std=0.0144)(signal)
+
+        # 将信号进行分离，分为前二通道与后三通道
+
+        top_two_signal = signal[:2, :]
+        rear_three_signal = signal[2:, :]
+
+        if self.mode == 'train':
+
+            # TSRandAugment
+            probability = random.random()
+            if probability < 0.2:
+                pass
+            elif probability < 0.6:
+                top_two_signal = TSGaussianNoise(.1, additive=True)(TSTensor(top_two_signal))
+            elif probability < 0.8:
+                top_two_signal = TSMaskOut(.1, compensate=True)(TSTensor(top_two_signal))
+            else:
+                top_two_signal = RandAugment(all_TS_randaugs, N=5, M=10)(top_two_signal, split_idx=0)
+
+        elif self.mode == 'val' or 'test':
+            pass
+
+        return top_two_signal.permute(1, 0), rear_three_signal.permute(1, 0)

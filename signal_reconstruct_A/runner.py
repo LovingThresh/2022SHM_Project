@@ -129,6 +129,6 @@ runner = Runner(
         timer=dict(type='IterTimerHook'),
         checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
         logger=dict(type='LoggerHook')),
-    load_from='S:/work_dir/DLinerNet/epoch_100.pth',
+    # load_from='S:/work_dir/DLinerNet/epoch_100.pth',
 )
 runner.train()

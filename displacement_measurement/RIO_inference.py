@@ -27,17 +27,16 @@ cv.fillPoly(mask_1, [pts], 255)
 pts_2 = np.array([[147, 1363], [147, 1318], [186, 1318], [196, 1551], [157, 1544]], np.int32)
 mask_2 = np.zeros((1920, 1080), np.uint8)
 cv.fillPoly(mask_2, [pts_2], 255)
-cv.imwrite('a_2.png', mask_2)
 
 pts_3 = np.array([[4, 1278], [102, 1271], [102, 1620], [0, 1936]], np.int32)
 mask_3 = np.zeros((1920, 1080), np.uint8)
 cv.fillPoly(mask_3, [pts_3], 255)
-cv.imwrite('a_3.png', mask_3)
 
 mask_ROI = np.uint8((mask_2 != mask_1) & (mask_3 != mask_1))
 mask_ROI = cv.rotate(mask_ROI, cv.ROTATE_90_COUNTERCLOCKWISE)
-cv.imwrite('a_4.png', mask_ROI * 255)
+cv.imwrite('a.png', mask_ROI * 255)
 n = 0
+
 while True:
     ret, frame = capture.read()
     if frame is None:

@@ -1,5 +1,5 @@
 from utils import dict2cls
-from data_loader import Signal_transform
+from data_loader import Signal_transform, Signal_transform_B
 
 
 # dataset setting
@@ -12,15 +12,20 @@ test_path = 'val'
 test_ann_file = "val.json"
 
 # transform setting
-train_transform = [Signal_transform(mode='train')]
-val_transform = [Signal_transform(mode='val')]
-test_transform = [Signal_transform(mode='test')]
+# train_transform = [Signal_transform(mode='train')]
+# val_transform = [Signal_transform(mode='val')]
+# test_transform = [Signal_transform(mode='test')]
+
+# transform setting
+train_transform = [Signal_transform_B(mode='train')]
+val_transform = [Signal_transform_B(mode='val')]
+test_transform = [Signal_transform_B(mode='test')]
 
 # batch_size setting
 batch_size = 64
 
 # model_cfg setting
-dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
+dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 2}
 DLiner_model_cfg = dict2cls(dic)
 
 dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 4, 'dec_in': 4, 'd_model': 256, 'embed': 'fixed',

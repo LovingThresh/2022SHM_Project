@@ -15,6 +15,9 @@ import scipy.io as scio
 clean_data_path = 'V:/2022SHM_Project/a/data_clean.mat'
 noise_data_path = 'V:/2022SHM_Project/a/data_noised.mat'
 
+clean_data_path = 'V:/2022SHM_Project/b/data_clean.mat'
+noise_data_path = 'V:/2022SHM_Project/b/data_noised.mat'
+
 mean = 3.0235e-07
 std = 0.0144
 
