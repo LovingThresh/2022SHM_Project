@@ -10,9 +10,14 @@ import random
 import numpy as np
 from tsai.data.core import TSTensor
 from tsai.data.preprocessing import TSStandardize
-from tsai.data.transforms import TSIdentity, TSGaussianNoise, TSMaskOut, RandAugment
+from tsai.data.transforms import TSIdentity, TSGaussianNoise, TSMaskOut, RandAugment, TSMagAddNoise, TSRandomTimeScale, \
+TSRandomLowRes, TSInputDropout, TSRandomTrend, TSVarOut, TSCutOut
 
-all_TS_randaugs = [TSIdentity]
+all_TS_randaugs = [
+    TSIdentity,
+    (TSVarOut, 0.05, 0.5),
+    (TSCutOut, 0.05, 0.5),
+]
 
 
 class Signal_transform:
@@ -29,7 +34,7 @@ class Signal_transform:
 
         signal = TSStandardize(mean=3.0235e-07, std=0.0144)(signal)
 
-        # 将信号进行分离，分为前四通道与第五通道
+        # 将信号进行分离，分为前四通道与第五个通道
 
         top_four_signal = signal[:4, :]
         fifth_signal = signal[-1:, :]
@@ -45,7 +50,7 @@ class Signal_transform:
             elif probability < 0.8:
                 top_four_signal = TSMaskOut(.1, compensate=True)(TSTensor(top_four_signal))
             else:
-                top_four_signal = RandAugment(all_TS_randaugs, N=5, M=10)(top_four_signal, split_idx=0)
+                top_four_signal = RandAugment(all_TS_randaugs, N=5, M=10)(TSTensor(top_four_signal))
 
         elif self.mode == 'val' or 'test':
             pass

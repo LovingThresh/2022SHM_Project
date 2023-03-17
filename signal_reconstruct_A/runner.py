@@ -1,3 +1,5 @@
+import argparse
+
 import torch
 import torch.nn.functional as F
 
@@ -97,38 +99,59 @@ class MM_MAELoss(BaseMetric):
 # -------------------------------------------------------- #
 #                          Runner                          #
 # -------------------------------------------------------- #
-runner = Runner(
-    model=dict(type='MM_DLinear', configs=DLiner_model_cfg),
-    work_dir='S:/work_dir/DLinerNet',
-    train_dataloader=dict(
-        batch_size=batch_size,
-        sampler=dict(type='DefaultSampler', shuffle=True),
-        dataset=BaseDataset(ann_file=train_ann_file, data_root=data_root, data_prefix={'file_path': train_path},
-                            pipeline=train_transform),
-        collate_fn=dict(type='default_collate')),
-    val_dataloader=dict(
-        batch_size=batch_size,
-        sampler=dict(type='DefaultSampler', shuffle=False),
-        dataset=BaseDataset(ann_file=val_ann_file, data_root=data_root, data_prefix={'file_path': val_path},
-                            pipeline=val_transform),
-        collate_fn=dict(type='default_collate')),
-    test_dataloader=dict(
-        batch_size=batch_size,
-        sampler=dict(type='DefaultSampler', shuffle=False),
-        dataset=BaseDataset(ann_file=test_ann_file, data_root=data_root, data_prefix={'file_path': test_path},
-                            pipeline=test_transform),
-        collate_fn=dict(type='default_collate')),
-    optim_wrapper=dict(type='OptimWrapper', optimizer=dict(type=AdamW, lr=init_lr)),
-    param_scheduler=param_scheduler,
-    train_cfg=dict(by_epoch=True, max_epochs=max_epoch, val_interval=1),
-    val_cfg=dict(),
-    val_evaluator=[dict(type='MM_MSELoss', prefix='val'), dict(type='MM_MAELoss', prefix='val')],
-    test_cfg=dict(),
-    test_evaluator=[dict(type='MM_MSELoss', prefix='test'), dict(type='MM_MAELoss', prefix='val')],
-    default_hooks=dict(
-        timer=dict(type='IterTimerHook'),
-        checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
-        logger=dict(type='LoggerHook')),
-    # load_from='S:/work_dir/DLinerNet/epoch_100.pth',
-)
-runner.train()
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='Distributed Training')
+    parser.add_argument(
+        '--launcher',
+        choices=['none', 'pytorch', 'slurm', 'mpi'],
+        default='none',
+        help='job launcher')
+    parser.add_argument('--local_rank', type=int, default=0)
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    args = parse_args()
+    runner = Runner(
+        model=dict(type='MM_DLinear', configs=DLiner_model_cfg),
+        work_dir='S:/work_dir/DLinerNet',
+        train_dataloader=dict(
+            batch_size=batch_size,
+            sampler=dict(type='DefaultSampler', shuffle=True),
+            dataset=BaseDataset(ann_file=train_ann_file, data_root=data_root, data_prefix={'file_path': train_path},
+                                pipeline=train_transform),
+            collate_fn=dict(type='default_collate')),
+        val_dataloader=dict(
+            batch_size=batch_size,
+            sampler=dict(type='DefaultSampler', shuffle=False),
+            dataset=BaseDataset(ann_file=val_ann_file, data_root=data_root, data_prefix={'file_path': val_path},
+                                pipeline=val_transform),
+            collate_fn=dict(type='default_collate')),
+        test_dataloader=dict(
+            batch_size=batch_size,
+            sampler=dict(type='DefaultSampler', shuffle=False),
+            dataset=BaseDataset(ann_file=test_ann_file, data_root=data_root, data_prefix={'file_path': test_path},
+                                pipeline=test_transform),
+            collate_fn=dict(type='default_collate')),
+        optim_wrapper=dict(type='OptimWrapper', optimizer=dict(type=AdamW, lr=init_lr)),
+        param_scheduler=param_scheduler,
+        train_cfg=dict(by_epoch=True, max_epochs=max_epoch, val_interval=1),
+        val_cfg=dict(),
+        val_evaluator=[dict(type='MM_MSELoss', prefix='val'), dict(type='MM_MAELoss', prefix='val')],
+        test_cfg=dict(),
+        test_evaluator=[dict(type='MM_MSELoss', prefix='test'), dict(type='MM_MAELoss', prefix='val')],
+        default_hooks=dict(
+            timer=dict(type='IterTimerHook'),
+            checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
+            logger=dict(type='LoggerHook')),
+        launcher=args.launcher,
+        # load_from='S:/work_dir/DLinerNet/epoch_100.pth',
+    )
+    runner.train()
+
+
+main()
