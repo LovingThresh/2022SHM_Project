@@ -1,35 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+  <component name="PublishConfigData" autoUpload="Always" serverName="ubuntu@172.16.1.5:22 password PT" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
-      <paths name="root@123.125.240.150:50409 password">
+      <paths name="ubuntu@172.16.1.5:22 password">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/ubuntu/data/2022SHM_Proect" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@123.125.240.150:50409 password (2)">
+      <paths name="ubuntu@172.16.1.5:22 password PT">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@region-41.autodl.com:29586 password">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@region-7.autodl.com:15119 password">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/ubuntu/data/2022SHM_Proect" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
     </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
   </component>
 </project>
