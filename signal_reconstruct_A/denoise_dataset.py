@@ -13,7 +13,7 @@ def make_noise(N):
 
     return noise
 
-
+#
 # 在原先的基础上增强一个降噪模型
 class Noise_Dataset(Dataset):
     def __init__(self, data_root, data_info):
