@@ -11,34 +11,32 @@ import shutil
 import numpy as np
 import scipy.io as scio
 
-
 clean_data_path = 'V:/2022SHM_Project/a/data_clean.mat'
 noise_data_path = 'V:/2022SHM_Project/a/data_noised.mat'
 
 clean_data_path = 'V:/2022SHM_Project/b/data_clean.mat'
 noise_data_path = 'V:/2022SHM_Project/b/data_noised.mat'
 
+# extend data from V:\2022SHM-dataset\project3\Damage_identification\train_dataset
 mean = 3.0235e-07
 std = 0.0144
 
 
 def load_mat_data(data_path):
-
     data_dict = scio.loadmat(data_path)
 
     return data_dict['data']  # return (5, 1000001) for task A 100 Hz
 
 
-loading_data = load_mat_data(data_path=clean_data_path)
+# loading_data = load_mat_data(data_path=clean_data_path)
 # loading_data = load_mat_data(data_path=noise_data_path)
 
-train_loading_data = loading_data[:, :int(0.95 * 1000001)]
-val_loading_data = loading_data[:, int(0.95 * 1000001) : int(0.975 * 1000001)]
-test_loading_data = loading_data[:, int(0.975 * 1000001):]
+# train_loading_data = loading_data[:, :int(0.95 * 1000001)]
+# val_loading_data = loading_data[:, int(0.95 * 1000001) : int(0.975 * 1000001)]
+# test_loading_data = loading_data[:, int(0.975 * 1000001):]
 
 
 def sliding_window(data, sw_width=256, n_out=128, in_start=0):
-
     data_list = []
 
     for i in range(data.shape[1]):
@@ -52,23 +50,22 @@ def sliding_window(data, sw_width=256, n_out=128, in_start=0):
     return data_list
 
 
-loading_data = test_loading_data
-X = sliding_window(loading_data, sw_width=256, n_out=128, in_start=0)
-X_1 = sliding_window(loading_data, sw_width=256, n_out=256, in_start=100)
+# loading_data = test_loading_data
+# X = sliding_window(loading_data, sw_width=256, n_out=128, in_start=0)
+# X_1 = sliding_window(loading_data, sw_width=256, n_out=256, in_start=100)
 
 
 # prex='start_0_n_128' ; 'start_100_n_256'
 #
 
 def save_crop_data(data_list, mode='train', prex='start_0_n_128'):
-
     for num, i in enumerate(data_list):
-
         np.savetxt('V:/2022SHM-dataset/crop_data_project_2_A_dataset/{}/{}_{}.csv'.format(mode, prex, num), i)
 
 
-save_crop_data(X, mode='test')
-save_crop_data(X_1, mode='test', prex='start_100_n_256')
+# save_crop_data(X, mode='test')
+# save_crop_data(X_1, mode='test', prex='start_100_n_256')
+
 
 # save_crop_data(X_2, prex='start_50_n_64')
 # save_crop_data(X_2, prex='start_50_n_128')
@@ -77,11 +74,10 @@ save_crop_data(X_1, mode='test', prex='start_100_n_256')
 
 
 def data_division(path, train_path, val_path, test_path):
-
     signal_file_list = os.listdir(path)
     random.shuffle(signal_file_list)
-    train_file_list =  signal_file_list[:int(len(signal_file_list) * 0.9)]
-    val_file_list = signal_file_list[int(len(signal_file_list) * 0.9) : int(len(signal_file_list) * 0.95)]
+    train_file_list = signal_file_list[:int(len(signal_file_list) * 0.9)]
+    val_file_list = signal_file_list[int(len(signal_file_list) * 0.9): int(len(signal_file_list) * 0.95)]
     test_file_list = signal_file_list[int(len(signal_file_list) * 0.95):]
 
     for file_list, dst_path in zip([train_file_list, val_file_list, test_file_list], [train_path, val_path, test_path]):
@@ -108,5 +104,18 @@ def get_info_meta(path, save_path):
     return None
 
 
-get_info_meta('V:/2022SHM-dataset/crop_data_project_2_A_dataset/val',
-              'V:/2022SHM-dataset/crop_data_project_2_A_dataset/val.json')
+get_info_meta('V:/2022SHM-dataset/crop_data_project_2_A_dataset/train',
+              'V:/2022SHM-dataset/crop_data_project_2_A_dataset/train.json')
+
+
+def load_mat_extend_data(data_path, sw_width=256, n_out=128, in_start=50):
+    for num, i in enumerate(os.listdir(data_path)):
+        if i.endswith('.mat'):
+            data_dict = scio.loadmat(os.path.join(data_path, i))
+            load_data = data_dict['A']
+            extend_data_list = sliding_window(load_data, sw_width=sw_width, n_out=n_out, in_start=in_start)
+            prex = '0_start_{}_n_{}_{}'.format(in_start, n_out, num)
+            save_crop_data(extend_data_list, mode='train', prex=prex)
+
+
+# load_mat_extend_data(data_path='V:/2022SHM-dataset/project3/Damage_identification/train_dataset')

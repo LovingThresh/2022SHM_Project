@@ -13,7 +13,7 @@ def make_noise(N):
 
     return noise
 
-#
+
 # 在原先的基础上增强一个降噪模型
 class Noise_Dataset(Dataset):
     def __init__(self, data_root, data_info):
@@ -45,15 +45,15 @@ class Noise_Dataset(Dataset):
             noise_data = clean_data + noise
 
         return TSStandardize(mean=3.0235e-07, std=0.0144)(TSTensor(noise_data)).permute(1, 0), \
-               TSStandardize(mean=3.0235e-07, std=0.0144)(TSTensor(clean_data)).permute(1, 0)
+            TSStandardize(mean=3.0235e-07, std=0.0144)(TSTensor(clean_data)).permute(1, 0)
 
 
 train_dataset = Noise_Dataset(data_root='V:/2022SHM-dataset/crop_data_project_2_A_dataset/train',
                               data_info='V:/2022SHM-dataset/crop_data_project_2_A_dataset/train.json')
 val_dataset = Noise_Dataset(data_root='V:/2022SHM-dataset/crop_data_project_2_A_dataset/val',
-                              data_info='V:/2022SHM-dataset/crop_data_project_2_A_dataset/val.json')
+                            data_info='V:/2022SHM-dataset/crop_data_project_2_A_dataset/val.json')
 test_dataset = Noise_Dataset(data_root='V:/2022SHM-dataset/crop_data_project_2_A_dataset/test',
-                              data_info='V:/2022SHM-dataset/crop_data_project_2_A_dataset/test.json')
+                             data_info='V:/2022SHM-dataset/crop_data_project_2_A_dataset/test.json')
 
 train_dataloader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
 val_dataloader = DataLoader(dataset=val_dataset, batch_size=16, shuffle=False)
