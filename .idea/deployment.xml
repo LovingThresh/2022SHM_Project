@@ -2,6 +2,13 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" remoteFilesAllowedToDisappearOnAutoupload="false">
     <serverData>
+      <paths name="SHM_Proect">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/experiment/workspace/liuye/9_2022SHM_Project" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="ubuntu@172.16.1.5:22 password">
         <serverdata>
           <mappings>

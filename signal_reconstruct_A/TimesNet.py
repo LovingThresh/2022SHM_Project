@@ -5,6 +5,8 @@ import torch.fft
 from layers.Embed import DataEmbedding
 from layers.Conv_Blocks import Inception_Block_V1
 
+from utils import dict2cls
+
 
 def FFT_for_Period(x, k=2):
     # [B, T, C]
@@ -118,3 +120,13 @@ class TimesNet(nn.Module):
         dec_out = self.forecast(x_enc, x_mark_enc)
 
         return torch.sum(dec_out[:, -self.pred_len:, :], dim=-1, keepdim=True)
+
+
+# dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 2, 'dec_in': 2, 'd_model': 128, 'embed': 'fixed',
+#        'dropout': 0.1, 'e_layers': 2, 'c_out': 3, 'd_ff': 256, 'num_kernels': 6, 'top_k': 5}
+# TimesNet_model_cfg = dict2cls(dic)
+# TimesNet_model = TimesNet(TimesNet_model_cfg)
+# pred = TimesNet_model(torch.randn(1, 256, 2))
+#
+# from thop import profile
+# flops, params = profile(TimesNet_model, inputs=(torch.randn(1, 256, 4), None))
