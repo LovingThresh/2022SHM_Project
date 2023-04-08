@@ -22,7 +22,7 @@ test_transform = [Signal_transform(mode='test')]
 # test_transform = [Signal_transform_B(mode='test')]
 
 # batch_size setting
-batch_size = 64
+batch_size = 256
 
 # model_cfg setting
 dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 2}
@@ -35,7 +35,7 @@ dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 4, 'dec_in': 4, '
 
 TimesNet_model_cfg = dict2cls(dic)
 
-max_epoch = 100
+max_epoch = 200
 init_lr = 0.001
 # init_lr = 0.00005
 
@@ -46,7 +46,7 @@ param_scheduler = [
          begin=0,
          end=5),
     dict(type='CosineAnnealingLR',
-         T_max=100,
+         T_max=max_epoch,
          by_epoch=True,
          begin=5,
-         end=100)]
+         end=max_epoch)]
