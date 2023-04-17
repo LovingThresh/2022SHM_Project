@@ -44,6 +44,36 @@ class MM_DLinear(BaseModel):
 
 
 @MODELS.register_module()
+class MM_Multi_DLinear(BaseModel):
+    def __init__(self, configs):
+        super().__init__()
+        self.net_1 = DLinear(configs=configs[0])
+        self.net_2 = DLinear(configs=configs[1])
+        self.net_3 = DLinear(configs=configs[2])
+        self.net = torch.nn.ModuleList([self.net_1, self.net_2, self.net_3])
+
+    def forward(self,
+                inputs: torch.Tensor,
+                data_samples: Union[Optional[list], torch.Tensor] = None,
+                mode: str = 'tensor') -> Union[Dict[str, torch.Tensor], list, tuple, None]:
+        result = []
+        for m in range(3):
+            x = self.net[m](inputs)
+            result.append(x)
+            inputs = torch.cat([inputs, x], dim=-1)
+        # 将result中的tensor拼接在一起
+        x = torch.cat(result, dim=-1)
+        if mode == 'loss':
+            return {'loss': F.mse_loss(x, data_samples)}
+        elif mode == 'predict':
+            return x, data_samples
+        elif mode == 'tensor':
+            return x
+        else:
+            return None
+
+
+@MODELS.register_module()
 class MM_TimesNet(BaseModel):
     def __init__(self, configs):
         super().__init__()
@@ -117,10 +147,12 @@ def parse_args():
 def main():
     args = parse_args()
     runner = Runner(
-        # model=dict(type='MM_DLinear', configs=DLiner_model_cfg),
-        model=dict(type='MM_TimesNet', configs=TimesNet_model_cfg),
-        # work_dir='S:/work_dir/DLinerNet',
-        work_dir='S:/work_dir/TimesNet',
+        model=dict(type='MM_DLinear', configs=DLiner_model_cfg),
+        # model=dict(type='MM_Multi_DLinear', configs=DLiner_model_cfg),
+        # model=dict(type='MM_TimesNet', configs=TimesNet_model_cfg),
+        work_dir='S:/work_dir/DLinerNet',
+        # work_dir='S:/work_dir/MM_Multi_DLinear',
+        # work_dir='S:/work_dir/TimesNet',
         train_dataloader=dict(
             batch_size=batch_size,
             sampler=dict(type='DefaultSampler', shuffle=True),
@@ -151,7 +183,7 @@ def main():
             checkpoint=dict(type='CheckpointHook', interval=5, max_keep_ckpts=10, rule='less'),
             logger=dict(type='LoggerHook')),
         launcher=args.launcher,
-        # load_from='S:/work_dir/DLinerNet/epoch_100.pth',
+        # load_from='S:/work_dir/DLinerNet/20230403_093404/epoch_200.pth',
     )
     runner.train()
 

@@ -25,13 +25,19 @@ test_transform = [Signal_transform(mode='test')]
 batch_size = 256
 
 # model_cfg setting
-dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 2}
+dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': 4}
 DLiner_model_cfg = dict2cls(dic)
+
+# model_cfg setting list
+# DLiner_model_cfg = []
+# for i in range(2, 5):
+#     dic = {"seq_len": 256, "pred_len": 256, "individual": True, 'enc_in': i}
+#     DLiner_model_cfg.append(dict2cls(dic))
 
 # dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 4, 'dec_in': 4, 'd_model': 256, 'embed': 'fixed',
 #        'dropout': 0.1, 'e_layers': 2, 'c_out': 1, 'd_ff': 512, 'num_kernels': 6, 'top_k': 5}
-dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 4, 'dec_in': 4, 'd_model': 128, 'embed': 'fixed',
-       'dropout': 0.1, 'e_layers': 2, 'c_out': 1, 'd_ff': 256, 'num_kernels': 6, 'top_k': 5}
+# dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 4, 'dec_in': 4, 'd_model': 128, 'embed': 'fixed',
+#        'dropout': 0.1, 'e_layers': 2, 'c_out': 1, 'd_ff': 256, 'num_kernels': 6, 'top_k': 5}
 
 TimesNet_model_cfg = dict2cls(dic)
 
