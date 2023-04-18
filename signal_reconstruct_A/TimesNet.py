@@ -84,6 +84,8 @@ class TimesNet(nn.Module):
                                            configs.dropout)
         self.layer = configs.e_layers
         self.layer_norm = nn.LayerNorm(configs.d_model)
+        self.adjust_linear = nn.Linear(
+            configs.enc_in, configs.c_out, bias=True)
         self.predict_linear = nn.Linear(
             self.seq_len, self.pred_len + self.seq_len)
         self.projection = nn.Linear(
@@ -91,6 +93,10 @@ class TimesNet(nn.Module):
 
     def forecast(self, x_enc, x_mark_enc):
         # Normalization from Non-stationary Transformer
+        # x_enc_ = self.adjust_linear(x_enc)
+        x_extend = x_enc[:, :, :1] + x_enc[:, :, 1:]
+        x_enc = torch.cat([x_enc, x_extend], dim=-1)
+
         means = x_enc.mean(1, keepdim=True).detach()
         x_enc = x_enc - means
         stdev = torch.sqrt(
@@ -119,10 +125,11 @@ class TimesNet(nn.Module):
 
         dec_out = self.forecast(x_enc, x_mark_enc)
 
-        return torch.sum(dec_out[:, -self.pred_len:, :], dim=-1, keepdim=True)
+        # return torch.sum(dec_out[:, -self.pred_len:, :], dim=-1, keepdim=True)
+        return dec_out[:, -self.pred_len:, :]
 
 
-# dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 2, 'dec_in': 2, 'd_model': 128, 'embed': 'fixed',
+# dic = {"seq_len": 256, "pred_len": 256, "freq": 'h', 'enc_in': 3, 'dec_in': 3, 'd_model': 128, 'embed': 'fixed',
 #        'dropout': 0.1, 'e_layers': 2, 'c_out': 3, 'd_ff': 256, 'num_kernels': 6, 'top_k': 5}
 # TimesNet_model_cfg = dict2cls(dic)
 # TimesNet_model = TimesNet(TimesNet_model_cfg)
